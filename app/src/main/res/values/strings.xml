@@ -1,0 +1,35 @@
+<resources>
+    <string name="app_name">encuestaAPP</string>
+
+    <!-- Login Screen -->
+    <string name="login_title">encuestaAPP</string>
+    <string name="login_subtitle">Inicia sesión para continuar</string>
+    <string name="email_label">Correo electrónico</string>
+    <string name="password_label">Contraseña</string>
+    <string name="forgot_password">¿Olvidaste tu contraseña?</string>
+    <string name="login_button">Iniciar sesión</string>
+    <string name="or_continue_with">o continua con</string>
+    <string name="google_login">Continuar con Google</string>
+    <string name="no_account">¿No tienes cuenta?</string>
+    <string name="register_link">Regístrate</string>
+
+    <!-- Register Screen -->
+    <string name="register_title">Crear Cuenta</string>
+    <string name="register_subtitle">Regístrate para empezar a votar</string>
+    <string name="confirm_password_label">Confirmar contraseña</string>
+    <string name="register_button">Crear cuenta</string>
+    <string name="already_have_account">¿Ya tienes una cuenta?</string>
+    <string name="login_link">Inicia sesión</string>
+
+    <!-- Navigation -->
+    <string name="nav_home">Inicio</string>
+    <string name="nav_tickets">Tickets</string>
+    <string name="nav_profile">Perfil</string>
+
+    <!-- Profile -->
+    <string name="profile_title">Perfil</string>
+    <string name="settings_theme">Ajustes de Tema</string>
+    <string name="dynamic_color">Color Dinámico</string>
+    <string name="high_contrast">Alto Contraste</string>
+    <string name="logout">Cerrar Sesión</string>
+</resources>
