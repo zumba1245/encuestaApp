@@ -1,6 +1,7 @@
 package com.example.encuestaapp.ui.screens.user
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -9,9 +10,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.encuestaapp.data.model.Survey
 import com.example.encuestaapp.ui.screens.admin.AdminHomeUiState
@@ -42,47 +45,78 @@ fun UserHomeScreen(
 
     Scaffold(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
-        topBar = {
-            CenterAlignedTopAppBar(
-                title = { Text("Explorar", fontWeight = FontWeight.ExtraBold) }
-            )
-        }
+        containerColor = MaterialTheme.colorScheme.background
     ) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-        ) {
-            AnimatedContent(targetState = uiState, label = "UserHomeContent") { state ->
-                when (state) {
-                    is AdminHomeUiState.Loading -> {
-                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            CircularProgressIndicator()
-                        }
+        Box(modifier = Modifier.fillMaxSize().padding(padding)) {
+            // Fondo con degradado decorativo arriba
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(200.dp)
+                    .background(
+                        Brush.verticalGradient(
+                            colors = listOf(
+                                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f),
+                                Color.Transparent
+                            )
+                        )
+                    )
+            )
+
+            Column(modifier = Modifier.fillMaxSize()) {
+                // Header estilizado
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(24.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column {
+                        Text(
+                            text = "Explorar",
+                            style = MaterialTheme.typography.displaySmall,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = MaterialTheme.colorScheme.onBackground
+                        )
+                        Text(
+                            text = "Encuestas activas hoy",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     }
-                    is AdminHomeUiState.Success -> {
-                        LazyColumn(
-                            modifier = Modifier.fillMaxSize(),
-                            contentPadding = PaddingValues(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(16.dp)
-                        ) {
-                            item { WelcomeHeader() }
-                            items(state.surveys) { survey ->
-                                SurveyCard(
-                                    survey = survey,
-                                    onClick = { votingViewModel.onSurveySelected(survey) }
-                                )
+                }
+
+                AnimatedContent(targetState = uiState, label = "UserHomeContent") { state ->
+                    when (state) {
+                        is AdminHomeUiState.Loading -> {
+                            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                CircularProgressIndicator(strokeWidth = 3.dp)
                             }
                         }
-                    }
-                    is AdminHomeUiState.Empty -> {
-                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            Text("No hay encuestas disponibles")
+                        is AdminHomeUiState.Success -> {
+                            LazyColumn(
+                                modifier = Modifier.fillMaxSize(),
+                                contentPadding = PaddingValues(bottom = 24.dp, start = 20.dp, end = 20.dp),
+                                verticalArrangement = Arrangement.spacedBy(16.dp)
+                            ) {
+                                items(state.surveys) { survey ->
+                                    SurveyCard(
+                                        survey = survey,
+                                        onClick = { votingViewModel.onSurveySelected(survey) }
+                                    )
+                                }
+                            }
                         }
-                    }
-                    is AdminHomeUiState.Error -> {
-                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            Text("Error: ${state.message}", color = MaterialTheme.colorScheme.error)
+                        is AdminHomeUiState.Empty -> {
+                            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                Text("No hay encuestas disponibles")
+                            }
+                        }
+                        is AdminHomeUiState.Error -> {
+                            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                Text("Error: ${state.message}", color = MaterialTheme.colorScheme.error)
+                            }
                         }
                     }
                 }
@@ -112,11 +146,13 @@ fun VoteDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false),
-        modifier = Modifier.padding(24.dp),
+        modifier = Modifier
+            .padding(24.dp)
+            .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(28.dp)),
         title = {
             Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
                 Text(survey.title, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.ExtraBold)
-                Text("Selecciona una opción", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.outline)
+                Text("Votación rápida", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
             }
         },
         text = {
@@ -124,14 +160,14 @@ fun VoteDialog(
                 modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Text(survey.question, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium)
+                Text(survey.question, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold)
                 
                 survey.options.forEach { option ->
                     val isSelected = selectedOption == option
                     Surface(
                         onClick = { selectedOption = option },
                         shape = RoundedCornerShape(16.dp),
-                        color = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                        color = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
                         border = if (isSelected) androidx.compose.foundation.BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null,
                         modifier = Modifier.fillMaxWidth()
                     ) {
@@ -150,8 +186,8 @@ fun VoteDialog(
             Button(
                 onClick = { selectedOption?.let { onVote(it) } },
                 enabled = selectedOption != null && !isVoting,
-                modifier = Modifier.fillMaxWidth().height(50.dp),
-                shape = RoundedCornerShape(12.dp)
+                modifier = Modifier.fillMaxWidth().height(56.dp),
+                shape = RoundedCornerShape(16.dp)
             ) {
                 if (isVoting) {
                     CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp, color = Color.White)
@@ -166,20 +202,4 @@ fun VoteDialog(
             }
         }
     )
-}
-
-@Composable
-fun WelcomeHeader() {
-    Column(modifier = Modifier.padding(bottom = 8.dp)) {
-        Text(
-            text = "Bienvenido de nuevo 👋",
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold
-        )
-        Text(
-            text = "Tu opinión transforma el futuro",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-    }
 }

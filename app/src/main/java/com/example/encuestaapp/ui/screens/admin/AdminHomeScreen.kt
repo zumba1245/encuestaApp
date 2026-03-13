@@ -15,6 +15,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -33,61 +35,68 @@ fun AdminHomeScreen(
     val uiState = viewModel.uiState
 
     Scaffold(
-        topBar = {
-            LargeTopAppBar(
-                title = { 
-                    Text(
-                        stringResource(R.string.nav_home),
-                        fontWeight = FontWeight.ExtraBold
-                    ) 
-                },
-                colors = TopAppBarDefaults.largeTopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background
-                )
-            )
-        },
+        containerColor = MaterialTheme.colorScheme.background,
         floatingActionButton = {
             FloatingActionButton(
                 onClick = onCreateSurveyClick,
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary,
-                shape = RoundedCornerShape(16.dp)
+                shape = RoundedCornerShape(16.dp),
+                elevation = FloatingActionButtonDefaults.elevation(8.dp)
             ) {
-                Icon(Icons.Default.Add, contentDescription = "Crear Encuesta")
+                Icon(Icons.Default.Add, contentDescription = "Crear Encuesta", modifier = Modifier.size(32.dp))
             }
         }
     ) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-        ) {
-            AnimatedContent(
-                targetState = uiState,
-                label = "AdminHomeContent"
-            ) { state ->
-                when (state) {
-                    is AdminHomeUiState.Loading -> {
-                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            CircularProgressIndicator()
+        Box(modifier = Modifier.fillMaxSize().padding(padding)) {
+            // Fondo con degradado
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(200.dp)
+                    .background(
+                        Brush.verticalGradient(
+                            colors = listOf(
+                                MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f),
+                                Color.Transparent
+                            )
+                        )
+                    )
+            )
+
+            Column(modifier = Modifier.fillMaxSize()) {
+                // Header
+                Text(
+                    text = stringResource(R.string.nav_home),
+                    style = MaterialTheme.typography.displaySmall,
+                    fontWeight = FontWeight.ExtraBold,
+                    modifier = Modifier.padding(24.dp)
+                )
+
+                AnimatedContent(targetState = uiState, label = "AdminHomeContent") { state ->
+                    when (state) {
+                        is AdminHomeUiState.Loading -> {
+                            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                CircularProgressIndicator()
+                            }
                         }
-                    }
-                    is AdminHomeUiState.Empty -> {
-                        EmptyHistory()
-                    }
-                    is AdminHomeUiState.Error -> {
-                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            Text(text = "Error: ${state.message}", color = MaterialTheme.colorScheme.error)
+                        is AdminHomeUiState.Empty -> {
+                            EmptyHistory()
                         }
-                    }
-                    is AdminHomeUiState.Success -> {
-                        LazyColumn(
-                            modifier = Modifier.fillMaxSize(),
-                            contentPadding = PaddingValues(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(16.dp)
-                        ) {
-                            items(state.surveys) { survey ->
-                                SurveyCard(survey = survey)
+                        is AdminHomeUiState.Error -> {
+                            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                Text(text = "Error: ${state.message}", color = MaterialTheme.colorScheme.error)
+                            }
+                        }
+                        is AdminHomeUiState.Success -> {
+                            LazyColumn(
+                                modifier = Modifier.fillMaxSize(),
+                                contentPadding = PaddingValues(horizontal = 20.dp, vertical = 8.dp),
+                                verticalArrangement = Arrangement.spacedBy(16.dp)
+                            ) {
+                                items(state.surveys) { survey ->
+                                    SurveyCard(survey = survey)
+                                }
                             }
                         }
                     }
@@ -125,7 +134,7 @@ fun EmptyHistory() {
             fontWeight = FontWeight.Bold
         )
         Text(
-            text = "Toca el botón + para empezar",
+            text = "Comienza creando tu primera encuesta",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.outline
         )
@@ -142,7 +151,6 @@ fun SurveyCard(survey: Survey, onClick: () -> Unit = {}) {
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column {
-            // Survey Image (If available)
             if (!survey.imageUrl.isNullOrBlank()) {
                 AsyncImage(
                     model = survey.imageUrl,
@@ -182,8 +190,7 @@ fun SurveyCard(survey: Survey, onClick: () -> Unit = {}) {
                     Text(
                         text = survey.title,
                         style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.ExtraBold,
-                        color = MaterialTheme.colorScheme.onSurface
+                        fontWeight = FontWeight.ExtraBold
                     )
                     Text(
                         text = survey.question,
